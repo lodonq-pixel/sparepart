@@ -137,3 +137,9 @@ body {
   border-radius: 8px;
   text-transform: none !important;
 }
+
+/* LOADER */
+#loader {
+  color: #374151;
+  font-size: 14px;
+}

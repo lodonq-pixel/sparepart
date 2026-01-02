@@ -5,7 +5,7 @@ import { loadPartial } from "./utils/domHelper.js";
 let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadPartial("navbar", "/partials/navbar.html");
+  await loadPartial("navbar", "partials/navbar.html");
 
   allProducts = await loadProducts();
   renderProductGrid(allProducts);

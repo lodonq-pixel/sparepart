@@ -1,11 +1,13 @@
+import { CONFIG } from "./config.js";
 import { loadProducts } from "./services/apiService.js";
 import { renderProductGrid } from "./components/productGrid.js";
-import { loadPartial } from "./utils/domHelper.js";
+import { loadPartial, updateHotlineNumber } from "./utils/domHelper.js";
 
 let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadPartial("navbar", "partials/navbar.html");
+  updateHotlineNumber(CONFIG.WHATSAPP_NUMBER);
 
   allProducts = await loadProducts();
   renderProductGrid(allProducts);

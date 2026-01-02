@@ -35,6 +35,22 @@ Google Sheets (Database)
 
 ---
 
+## 🚀 Menjalankan di Komputer Lokal
+
+1. Install browser-sync secara global (jika belum terpasang):
+   ```bash
+   npm install -g browser-sync
+   ```
+2. Buka terminal dan masuk ke direktori proyek:
+   ```bash
+   cd /path/ke/proyek/sparepart
+   ```
+3. Jalankan perintah berikut:
+   ```bash
+   browser-sync start --server --files "**/*.html, **/*.css, **/*.js"
+   ```
+4. Browser akan terbuka secara otomatis dengan fitur auto-reload
+
 ## 1️⃣ Persiapan Database (Google Sheets)
 
 ### 1. Buat Google Sheets baru
@@ -134,14 +150,6 @@ Website akan online di:
 ```
 https://username.github.io/nama-repo
 ```
-
----
-
-### Opsi B: Netlify
-
-1. Buka [https://netlify.com](https://netlify.com)
-2. Drag & drop folder project
-3. Website langsung online
 
 ---
 

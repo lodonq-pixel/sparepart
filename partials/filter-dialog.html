@@ -1,37 +1,75 @@
-<div class="modal fade" id="filterModal" tabindex="-1">
+<div class="modal fade filter-modal" id="filterModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
-            <div class="modal-header">
-                <h6 class="modal-title">Filter Produk</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <!-- HEADER -->
+            <div class="filter-header">
+                <h5 class="filter-title">Filter Produk</h5>
+                <button
+                        type="button"
+                        class="filter-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    ×
+                </button>
             </div>
 
+            <!-- BODY -->
             <div class="modal-body">
+
+                <!-- KATEGORI -->
                 <div class="mb-3">
-                    <label class="form-label small">Kategori</label>
-                    <select id="filterKategori" class="form-select form-select-sm">
+                    <label class="form-label small fw-semibold text-muted">
+                        Kategori
+                    </label>
+                    <select
+                            id="filterKategori"
+                            class="form-select form-select-sm">
                         <option value="">Semua Kategori</option>
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label small">Harga Dari</label>
-                    <input id="priceFrom" type="number"
-                           class="form-control form-control-sm">
+                <!-- PRICE RANGE -->
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold text-muted">
+                            Harga Dari
+                        </label>
+                        <input
+                                type="number"
+                                id="priceFrom"
+                                class="form-control form-control-sm"
+                                placeholder="0"
+                        >
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold text-muted">
+                            Sampai
+                        </label>
+                        <input
+                                type="number"
+                                id="priceTo"
+                                class="form-control form-control-sm"
+                                placeholder="99999999">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="form-label small">Harga Sampai</label>
-                    <input id="priceTo" type="number"
-                           class="form-control form-control-sm">
-                </div>
             </div>
 
-            <div class="modal-footer">
-                <button id="resetFilter" class="btn btn-light btn-sm">Reset</button>
-                <button id="applyFilter"
-                        class="btn btn-dark btn-sm"
+            <!-- FOOTER -->
+            <div class="modal-footer border-0 pt-0">
+                <button
+                        id="resetFilter"
+                        type="button"
+                        class="btn btn-light btn-sm">
+                    Reset
+                </button>
+
+                <button
+                        id="applyFilter"
+                        type="button"
+                        class="btn btn-sm btn-apply-filter"
                         data-bs-dismiss="modal">
                     Terapkan
                 </button>

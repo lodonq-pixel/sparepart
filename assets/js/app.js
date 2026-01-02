@@ -167,4 +167,3 @@ function hideLoader() {
   document.getElementById("loader")
       ?.classList.add("d-none");
 }
-x

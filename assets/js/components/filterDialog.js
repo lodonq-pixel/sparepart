@@ -14,11 +14,25 @@ export function initFilterDialog({
             onApply(filter);
         });
 
-    document.getElementById("resetFilter")
-        .addEventListener("click", () => {
-            resetUI();
-            onApply({});
-        });
+    const resetButton = document.getElementById("resetFilter");
+    const modal = document.getElementById("filterModal");
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    
+    resetButton.addEventListener("click", () => {
+        resetUI();
+        onApply({});
+        
+        // Close the modal after a short delay to show the reset action
+        setTimeout(() => {
+            if (modalInstance) {
+                modalInstance.hide();
+            } else if (typeof bootstrap !== 'undefined') {
+                // Fallback in case instance isn't available
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.hide();
+            }
+        }, 300);
+    });
 }
 
 /* ======================

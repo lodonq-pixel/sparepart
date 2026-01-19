@@ -3,7 +3,9 @@ import { loadProducts } from "./services/apiService.js";
 import { renderProductGrid } from "./components/productGrid.js";
 import { loadPartial, updateHotlineNumber } from "./utils/domHelper.js";
 import { initFilterDialog } from "./components/filterDialog.js";
+import { renderHero } from "./components/hero.js";
 
+renderHero();
 /* =====================
    CONSTANTS & STATE
 ===================== */
@@ -45,11 +47,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       currentFilter.priceFrom = filter.priceFrom ?? null;
       currentFilter.priceTo = filter.priceTo ?? null;
       applyAllFilters();
+    },
+    onReset: () => {
+      currentFilter.kategori = "";
+      currentFilter.priceFrom = null;
+      currentFilter.priceTo = null;
+      document.getElementById('searchProduk').value = '';
+      currentFilter.keyword = '';
+      applyAllFilters();
     }
   });
 
-  // Initial load
-  loadUntilScrollable();
+  // Initial load - show first page immediately
+  loadFirstPage();
 
   // Search by name only
   document.addEventListener("input", e => {
@@ -59,13 +69,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Infinite scroll
-  window.addEventListener("scroll", handleScroll);
+  // Infinite scroll will be enabled after first page load
 });
 
 /* =====================
    FILTER & SEARCH CORE
 ===================== */
+
+function updateFilterBadge() {
+  const badge = document.getElementById('filterBadge');
+  if (!badge) return;
+
+  const activeFilters = [
+    currentFilter.kategori ? 1 : 0,
+    currentFilter.priceFrom ? 1 : 0,
+    currentFilter.priceTo ? 1 : 0,
+    currentFilter.keyword ? 1 : 0
+  ].reduce((a, b) => a + b, 0);
+
+  if (activeFilters > 0) {
+    badge.textContent = activeFilters;
+    badge.classList.remove('d-none');
+  } else {
+    badge.classList.add('d-none');
+  }
+}
 
 function applyAllFilters() {
   filteredProducts = allProducts.filter(p => {
@@ -96,6 +124,7 @@ function applyAllFilters() {
     return true;
   });
 
+  updateFilterBadge();
   resetAndLoad();
 }
 
@@ -106,23 +135,31 @@ function applyAllFilters() {
 function resetAndLoad() {
   currentPage = 1;
   document.getElementById("product-grid").innerHTML = "";
-  loadUntilScrollable();
+  loadFirstPage();
 }
 
-function loadUntilScrollable() {
+async function loadFirstPage() {
+  if (filteredProducts.length === 0) return;
+  
   showLoader();
-
-  while (
-      document.body.scrollHeight <= window.innerHeight &&
-      hasMoreData()
-      ) {
-    loadNextPage();
-  }
-
+  
+  // Load just the first page
+  const start = 0;
+  const end = PAGE_SIZE;
+  const pageItems = filteredProducts.slice(start, end);
+  
+  // Render the first page (not in append mode)
+  renderProductGrid(pageItems, false);
+  
+  currentPage = 2; // Set to next page for lazy loading
+  
+  // Enable scroll listener after first page is loaded
+  window.addEventListener('scroll', handleScroll, { once: true });
+  
   hideLoader();
 }
 
-function loadNextPage() {
+async function loadNextPage() {
   if (isLoading || !hasMoreData()) return;
 
   isLoading = true;
@@ -132,7 +169,7 @@ function loadNextPage() {
   const end = start + PAGE_SIZE;
   const pageItems = filteredProducts.slice(start, end);
 
-  // append mode
+  // Append to existing products
   renderProductGrid(pageItems, true);
 
   currentPage++;
@@ -140,14 +177,25 @@ function loadNextPage() {
   hideLoader();
 }
 
+let isScrolling = false;
+
 function handleScroll() {
+  if (isScrolling) return;
+  
+  isScrolling = true;
+  
   const nearBottom =
       window.innerHeight + window.scrollY >=
-      document.body.offsetHeight - 200;
+      document.body.offsetHeight - 500; // Increased threshold for better UX
 
-  if (nearBottom) {
+  if (nearBottom && hasMoreData()) {
     loadNextPage();
   }
+  
+  // Throttle the scroll event
+  setTimeout(() => {
+    isScrolling = false;
+  }, 200);
 }
 
 function hasMoreData() {
@@ -159,11 +207,19 @@ function hasMoreData() {
 ===================== */
 
 function showLoader() {
-  document.getElementById("loader")
-      ?.classList.remove("d-none");
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.style.display = 'flex';
+    loader.style.justifyContent = 'center';
+    loader.style.alignItems = 'center';
+    loader.style.gap = '0.5rem';
+    loader.style.minHeight = '50px';
+  }
 }
 
 function hideLoader() {
-  document.getElementById("loader")
-      ?.classList.add("d-none");
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.style.display = 'none';
+  }
 }

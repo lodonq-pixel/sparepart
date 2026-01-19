@@ -6,6 +6,7 @@ import { initFilterDialog } from "./components/filterDialog.js";
 import { renderHero } from "./components/hero.js";
 
 renderHero();
+
 /* =====================
    CONSTANTS & STATE
 ===================== */
@@ -28,52 +29,60 @@ let currentFilter = {
    INIT APP
 ===================== */
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // Load UI partials
-  await loadPartial("navbar", "partials/navbar.html");
-  await loadPartial("filterDialog", "partials/filter-dialog.html");
+document.addEventListener("DOMContentLoaded", initApp);
 
-  updateHotlineNumber(CONFIG.WHATSAPP_NUMBER);
+async function initApp() {
+  try {
+    showLoader();
 
-  // Load data
-  allProducts = await loadProducts();
-  filteredProducts = [...allProducts];
+    const [_, __, ___, products] = await Promise.all([
+      loadPartial("navbar", "partials/navbar.html"),
+      loadPartial("filterDialog", "partials/filter-dialog.html"),
+      loadPartial("contact-footer", "partials/contact-footer.html"), // 🔥 FIX
+      loadProducts()
+    ]);
 
-  // Init filter dialog component
-  initFilterDialog({
-    products: allProducts,
-    onApply: filter => {
-      currentFilter.kategori = filter.kategori || "";
-      currentFilter.priceFrom = filter.priceFrom ?? null;
-      currentFilter.priceTo = filter.priceTo ?? null;
-      applyAllFilters();
-    },
-    onReset: () => {
-      currentFilter.kategori = "";
-      currentFilter.priceFrom = null;
-      currentFilter.priceTo = null;
-      document.getElementById('searchProduk').value = '';
-      currentFilter.keyword = '';
-      applyAllFilters();
-    }
-  });
+    updateHotlineNumber(CONFIG.WHATSAPP_NUMBER);
 
-  // Initial load - show first page immediately
-  loadFirstPage();
+    allProducts = products;
+    filteredProducts = [...allProducts];
 
-  // Search by name only
-  document.addEventListener("input", e => {
-    if (e.target.id === "searchProduk") {
-      currentFilter.keyword = e.target.value.trim().toLowerCase();
-      applyAllFilters();
-    }
-  });
+    initFilterDialog({
+      products: allProducts,
+      onApply: filter => {
+        currentFilter.kategori = filter.kategori || "";
+        currentFilter.priceFrom = filter.priceFrom ?? null;
+        currentFilter.priceTo = filter.priceTo ?? null;
+        applyAllFilters();
+      },
+      onReset: () => {
+        currentFilter.kategori = "";
+        currentFilter.priceFrom = null;
+        currentFilter.priceTo = null;
+        document.getElementById('searchProduk').value = '';
+        currentFilter.keyword = '';
+        applyAllFilters();
+      }
+    });
 
-  // Infinite scroll will be enabled after first page load
-});
+    loadFirstPage();
+
+    document.addEventListener("input", e => {
+      if (e.target.id === "searchProduk") {
+        currentFilter.keyword = e.target.value.trim().toLowerCase();
+        applyAllFilters();
+      }
+    });
+
+  } catch (err) {
+    console.error("Init error:", err);
+  } finally {
+    hideLoader();
+  }
+}
 
 /* =====================
-   FILTER & SEARCH CORE
+   FILTER CORE
 ===================== */
 
 function updateFilterBadge() {
@@ -96,25 +105,22 @@ function updateFilterBadge() {
 
 function applyAllFilters() {
   filteredProducts = allProducts.filter(p => {
-    // Search by name
+
     if (
         currentFilter.keyword &&
         !p.nama.toLowerCase().includes(currentFilter.keyword)
     ) return false;
 
-    // Filter by category
     if (
         currentFilter.kategori &&
         p.kategori !== currentFilter.kategori
     ) return false;
 
-    // Filter by price from
     if (
         currentFilter.priceFrom !== null &&
         p.harga < currentFilter.priceFrom
     ) return false;
 
-    // Filter by price to
     if (
         currentFilter.priceTo !== null &&
         p.harga > currentFilter.priceTo
@@ -128,7 +134,7 @@ function applyAllFilters() {
 }
 
 /* =====================
-   PAGINATION / LAZY LOAD
+   PAGINATION
 ===================== */
 
 function resetAndLoad() {
@@ -139,22 +145,18 @@ function resetAndLoad() {
 
 async function loadFirstPage() {
   if (filteredProducts.length === 0) return;
-  
+
   showLoader();
-  
-  // Load just the first page
-  const start = 0;
-  const end = PAGE_SIZE;
-  const pageItems = filteredProducts.slice(start, end);
-  
-  // Render the first page (not in append mode)
+
+  const pageItems = filteredProducts.slice(0, PAGE_SIZE);
+
   renderProductGrid(pageItems, false);
-  
-  currentPage = 2; // Set to next page for lazy loading
-  
-  // Enable scroll listener after first page is loaded
-  window.addEventListener('scroll', handleScroll, { once: true });
-  
+
+  currentPage = 2;
+
+  /* Aktifkan infinite scroll */
+  window.addEventListener('scroll', handleScroll);
+
   hideLoader();
 }
 
@@ -168,7 +170,6 @@ async function loadNextPage() {
   const end = start + PAGE_SIZE;
   const pageItems = filteredProducts.slice(start, end);
 
-  // Append to existing products
   renderProductGrid(pageItems, true);
 
   currentPage++;
@@ -176,24 +177,22 @@ async function loadNextPage() {
   hideLoader();
 }
 
-let isScrolling = false;
+let scrollLock = false;
 
 function handleScroll() {
-  if (isScrolling) return;
-  
-  isScrolling = true;
-  
+  if (scrollLock) return;
+  scrollLock = true;
+
   const nearBottom =
       window.innerHeight + window.scrollY >=
-      document.body.offsetHeight - 500; // Increased threshold for better UX
+      document.body.offsetHeight - 400;
 
-  if (nearBottom && hasMoreData()) {
+  if (nearBottom) {
     loadNextPage();
   }
-  
-  // Throttle the scroll event
+
   setTimeout(() => {
-    isScrolling = false;
+    scrollLock = false;
   }, 200);
 }
 
@@ -202,23 +201,21 @@ function hasMoreData() {
 }
 
 /* =====================
-   LOADER UI
+   LOADER
 ===================== */
 
 function showLoader() {
   const loader = document.getElementById("loader");
-  if (loader) {
-    loader.style.display = 'flex';
-    loader.style.justifyContent = 'center';
-    loader.style.alignItems = 'center';
-    loader.style.gap = '0.5rem';
-    loader.style.minHeight = '50px';
-  }
+  if (!loader) return;
+
+  loader.style.display = 'flex';
+  loader.style.justifyContent = 'center';
+  loader.style.alignItems = 'center';
+  loader.style.gap = '0.5rem';
+  loader.style.minHeight = '50px';
 }
 
 function hideLoader() {
   const loader = document.getElementById("loader");
-  if (loader) {
-    loader.style.display = 'none';
-  }
+  if (loader) loader.style.display = 'none';
 }

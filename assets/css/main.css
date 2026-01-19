@@ -485,3 +485,7 @@ body {
     font-size: 14px;
     letter-spacing: 1px;
 }
+
+#searchProduk {
+    padding-left: 2.75rem;
+}

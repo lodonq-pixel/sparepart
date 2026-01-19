@@ -83,8 +83,7 @@ function updateFilterBadge() {
   const activeFilters = [
     currentFilter.kategori ? 1 : 0,
     currentFilter.priceFrom ? 1 : 0,
-    currentFilter.priceTo ? 1 : 0,
-    currentFilter.keyword ? 1 : 0
+    currentFilter.priceTo ? 1 : 0
   ].reduce((a, b) => a + b, 0);
 
   if (activeFilters > 0) {

@@ -1,6 +1,6 @@
 export function renderHero() {
     document.getElementById("hero").innerHTML = `
-    <section class="hero-industrial">
+    <section class="hero">
       <h1>PT. <span>HANIF PERSADA</span> PUTRA</h1>
 
       <p class="hero-desc">
@@ -9,7 +9,7 @@ export function renderHero() {
         Dedikasi kami adalah memastikan kelancaran logistik nasional melalui distribusi suku cadang yang cepat, tepat, dan terjamin kualitasnya.
       </p>
 
-      <div class="hero-cta">
+      <div class="hero-btn">
         <a href="#katalog" class="btn-order">LIHAT PRODUK</a>
         <a href="#lokasi" class="btn-order">KUNJUNGI KAMI</a>
       </div>
